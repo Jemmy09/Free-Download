@@ -164,7 +164,7 @@ app.get('/api/admin/verify', requireAuth, (req, res) => {
 const PORT = process.env.PORT || 3000;
 
 // Start server immediately so Railway health check passes
-app.listen(PORT, () => console.log(`FreeDownload API running on port ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`FreeDownload API running on port ${PORT}`));
 
 // Then connect to DB separately — retries up to 5 times
 async function connectWithRetry(retries = 5, delay = 3000) {
