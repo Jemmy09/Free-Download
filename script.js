@@ -176,7 +176,7 @@ function renderSoftware(list) {
     return;
   }
   grid.innerHTML = list.map(sw => `
-    <div class="sw-card" onclick="openModal(${sw.id})">
+    <div class="sw-card" data-id="${sw.id}">
       <div class="sw-card-header">
         <div class="sw-icon" style="background:${esc(sw.logoBg)}">
           <img src="${esc(sw.logo)}" alt="${esc(sw.name)} logo" data-fallback="${esc(sw.name[0])}">
@@ -195,10 +195,21 @@ function renderSoftware(list) {
           <span class="stars">${"\u2605".repeat(Math.floor(sw.rating))}${sw.rating % 1 >= 0.5 ? "\u00bd" : ""}${"\u2606".repeat(5-Math.ceil(sw.rating))}</span>
           <span>${sw.rating} (${esc(sw.reviews)})</span>
         </div>
-        <button class="sw-dl-btn" onclick="event.stopPropagation();openModal(${sw.id})">\u2b07 Get</button>
+        <button class="sw-dl-btn" data-id="${sw.id}">\u2b07 Get</button>
       </div>
     </div>
   `).join("");
+
+  // Safe event listeners — no inline onclick handlers, no injected executable code
+  grid.querySelectorAll('.sw-card').forEach(card => {
+    card.addEventListener('click', () => openModal(parseInt(card.dataset.id, 10)));
+  });
+  grid.querySelectorAll('.sw-dl-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      openModal(parseInt(btn.dataset.id, 10));
+    });
+  });
 
   // Safe image fallback — no inline onerror to prevent code injection
   grid.querySelectorAll('.sw-icon img').forEach(img => {
