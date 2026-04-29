@@ -5,7 +5,7 @@
 ═══════════════════════════════════════ */
 
 /* ── API base URL — replace with your Railway service URL after deploying ── */
-const API_URL   = 'https://freedownload-api.up.railway.app'; // ← update after deploy
+const API_URL   = 'https://free-download-production.up.railway.app';
 const TOKEN_KEY = 'fd_admin_jwt';
 const STORE_KEY = 'fd_software';
 

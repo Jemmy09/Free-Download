@@ -87,6 +87,7 @@ function requireAuth(req, res, next) {
 ══════════════════════════════ */
 
 /* Health check */
+app.get('/', (req, res) => res.json({ status: 'ok', service: 'FreeDownload API' }));
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
 /* ── REGISTER (first admin only — disabled once one admin exists) ── */
@@ -161,9 +162,22 @@ app.get('/api/admin/verify', requireAuth, (req, res) => {
 
 /* ── START ── */
 const PORT = process.env.PORT || 3000;
-initDB().then(() => {
-  app.listen(PORT, () => console.log(`FreeDownload API running on port ${PORT}`));
-}).catch(err => {
-  console.error('Failed to connect to database:', err.message);
-  process.exit(1);
-});
+
+// Start server immediately so Railway health check passes
+app.listen(PORT, () => console.log(`FreeDownload API running on port ${PORT}`));
+
+// Then connect to DB separately — retries up to 5 times
+async function connectWithRetry(retries = 5, delay = 3000) {
+  for (let i = 1; i <= retries; i++) {
+    try {
+      await initDB();
+      return;
+    } catch (err) {
+      console.error(`DB connection attempt ${i}/${retries} failed: ${err.message}`);
+      if (i < retries) await new Promise(r => setTimeout(r, delay));
+    }
+  }
+  console.error('All DB connection attempts failed. API running without database.');
+}
+
+connectWithRetry();
