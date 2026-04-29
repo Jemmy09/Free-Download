@@ -16,3 +16,10 @@ desktop.ini
 
 # Local scripts
 push-to-github.bat
+
+# Environment variables — NEVER commit real credentials
+.env
+.env.local
+
+# Node
+node_modules/

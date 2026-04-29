@@ -1,34 +1,19 @@
 /* ═══════════════════════════════════════
    admin.js — FreeDownload Admin Panel
-   Login: admin / admin123
+   Auth: Aiven MySQL via Render API
+   No hardcoded credentials.
 ═══════════════════════════════════════ */
 
-const ADMIN_CREDS   = { user: 'admin', pass: 'admin123' };
-const STORE_KEY     = 'fd_software';
-const SESSION_KEY   = 'fd_admin_session';
-const SESSION_TOKEN = 'fd$2026$auth';
+/* ── API base URL — replace with your Render service URL after deploying ── */
+const API_URL   = 'https://freedownload-api.onrender.com'; // ← update after deploy
+const TOKEN_KEY = 'fd_admin_jwt';
+const STORE_KEY = 'fd_software';
 
-// Timing-safe string comparison — prevents CWE-208 timing attacks
-// Compares every character regardless of where a mismatch occurs
-function timingSafeEqual(a, b) {
-  if (typeof a !== 'string' || typeof b !== 'string') return false;
-  const lenA = a.length;
-  const lenB = b.length;
-  // Pad shorter string so length itself doesn't leak timing info
-  const maxLen = Math.max(lenA, lenB);
-  let result = lenA === lenB ? 0 : 1;
-  for (let i = 0; i < maxLen; i++) {
-    const ca = a.charCodeAt(i % lenA);
-    const cb = b.charCodeAt(i % lenB);
-    result |= ca ^ cb;
-  }
-  return result === 0;
-}
-
-function isAuthenticated() {
-  const stored = sessionStorage.getItem(SESSION_KEY);
-  return timingSafeEqual(stored || '', SESSION_TOKEN);
-}
+/* ── Token helpers ── */
+function getToken()        { return localStorage.getItem(TOKEN_KEY); }
+function setToken(t)       { localStorage.setItem(TOKEN_KEY, t); }
+function clearToken()      { localStorage.removeItem(TOKEN_KEY); }
+function isAuthenticated() { return !!getToken(); }
 
 /* ── Storage helpers ── */
 function getApps() {
@@ -42,48 +27,152 @@ function saveApps(apps) {
 }
 
 /* ══════════════════════════════
-   AUTH
+   TAB SWITCH
 ══════════════════════════════ */
-function doLogin() {
+function switchTab(tab) {
+  document.getElementById('loginForm').style.display    = tab === 'login'    ? 'block' : 'none';
+  document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
+  document.getElementById('tabLogin').classList.toggle('active',    tab === 'login');
+  document.getElementById('tabRegister').classList.toggle('active', tab === 'register');
+  document.getElementById('loginError').textContent    = '';
+  document.getElementById('registerError').textContent = '';
+}
+
+/* ══════════════════════════════
+   AUTH — LOGIN
+══════════════════════════════ */
+async function doLogin() {
+  const btn = document.getElementById('loginBtn');
+  const err = document.getElementById('loginError');
   const u   = document.getElementById('loginUser').value.trim();
   const p   = document.getElementById('loginPass').value;
-  const err = document.getElementById('loginError');
-  if (u === ADMIN_CREDS.user && p === ADMIN_CREDS.pass) {
-    sessionStorage.setItem(SESSION_KEY, SESSION_TOKEN);
-    showPanel();
-  } else {
-    err.textContent = '✕ Incorrect username or password.';
-    document.getElementById('loginPass').value = '';
+
+  err.textContent = '';
+  if (!u || !p) { err.textContent = '✕ Please enter username and password.'; return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Signing in…';
+
+  try {
+    const res  = await fetch(`${API_URL}/api/admin/login`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ username: u, password: p })
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      err.textContent = '✕ ' + (data.error || 'Login failed.');
+      document.getElementById('loginPass').value = '';
+    } else {
+      setToken(data.token);
+      showPanel(data.username);
+    }
+  } catch {
+    err.textContent = '✕ Cannot reach server. Check your connection.';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Sign In →';
   }
 }
+
+/* ══════════════════════════════
+   AUTH — REGISTER
+══════════════════════════════ */
+async function doRegister() {
+  const btn  = document.getElementById('registerBtn');
+  const err  = document.getElementById('registerError');
+  const u    = document.getElementById('regUser').value.trim();
+  const p    = document.getElementById('regPass').value;
+  const p2   = document.getElementById('regPassConfirm').value;
+
+  err.textContent = '';
+  if (!u || !p || !p2) { err.textContent = '✕ All fields are required.'; return; }
+  if (p !== p2)         { err.textContent = '✕ Passwords do not match.'; return; }
+  if (p.length < 8)     { err.textContent = '✕ Password must be at least 8 characters.'; return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Creating account…';
+
+  try {
+    const res  = await fetch(`${API_URL}/api/admin/register`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ username: u, password: p })
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      err.textContent = '✕ ' + (data.error || 'Registration failed.');
+    } else {
+      err.style.color = '#4ade80';
+      err.textContent = '✅ Account created! You can now sign in.';
+      setTimeout(() => { switchTab('login'); err.style.color = ''; }, 1800);
+    }
+  } catch {
+    err.textContent = '✕ Cannot reach server. Check your connection.';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Create Account →';
+  }
+}
+
+/* ══════════════════════════════
+   AUTH — LOGOUT
+══════════════════════════════ */
 function doLogout() {
-  sessionStorage.removeItem(SESSION_KEY);
-  document.getElementById('adminShell').style.display = 'none';
+  clearToken();
+  document.getElementById('adminShell').style.display  = 'none';
   document.getElementById('loginScreen').style.display = 'flex';
-  document.getElementById('loginUser').value = '';
-  document.getElementById('loginPass').value = '';
+  document.getElementById('loginUser').value  = '';
+  document.getElementById('loginPass').value  = '';
   document.getElementById('loginError').textContent = '';
 }
-function showPanel() {
+
+/* ══════════════════════════════
+   SHOW PANEL
+══════════════════════════════ */
+function showPanel(username) {
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('adminShell').style.display  = 'flex';
+  const badge = document.getElementById('adminBadge');
+  if (badge) badge.textContent = '👤 ' + (username || 'Admin');
   initAdmin();
 }
 
-/* Enter key on login */
-['loginUser','loginPass'].forEach(id =>
-  document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); })
-);
+/* ── Enter key support ── */
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('loginUser')?.addEventListener('keydown',      e => { if (e.key === 'Enter') doLogin(); });
+  document.getElementById('loginPass')?.addEventListener('keydown',      e => { if (e.key === 'Enter') doLogin(); });
+  document.getElementById('regPassConfirm')?.addEventListener('keydown', e => { if (e.key === 'Enter') doRegister(); });
+});
 
-/* Restore session only if valid token present.
-   Anyone visiting admin.html directly without logging in
-   will always see the login screen — panel stays hidden. */
-if (isAuthenticated()) {
-  showPanel();
-} else {
-  document.getElementById('adminShell').style.display  = 'none';
-  document.getElementById('loginScreen').style.display = 'flex';
-}
+/* ── Auto-restore session: verify token with server on page load ── */
+(async () => {
+  const token = getToken();
+  if (!token) {
+    document.getElementById('adminShell').style.display  = 'none';
+    document.getElementById('loginScreen').style.display = 'flex';
+    return;
+  }
+  try {
+    const res  = await fetch(`${API_URL}/api/admin/verify`, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      showPanel(data.username);
+    } else {
+      clearToken();
+      document.getElementById('adminShell').style.display  = 'none';
+      document.getElementById('loginScreen').style.display = 'flex';
+    }
+  } catch {
+    /* Server unreachable — show login, don't auto-login */
+    document.getElementById('adminShell').style.display  = 'none';
+    document.getElementById('loginScreen').style.display = 'flex';
+  }
+})();
 
 /* ══════════════════════════════
    SIDEBAR (mobile)
@@ -158,7 +247,6 @@ function renderDashboard() {
     </div>
   `;
 
-  /* Recent 5 */
   const recent = apps.slice(-5).reverse();
   document.getElementById('recentList').innerHTML = recent.length
     ? recent.map(a => `
@@ -175,7 +263,6 @@ function renderDashboard() {
       `).join('')
     : '<div class="empty-state"><p>No apps yet.</p></div>';
 
-  /* Category bars */
   const max = Math.max(...Object.values(cats), 1);
   document.getElementById('catChart').innerHTML = Object.entries(cats)
     .sort((a, b) => b[1] - a[1])
@@ -202,7 +289,6 @@ function renderTable() {
   if (q)   apps = apps.filter(a => a.name.toLowerCase().includes(q) || a.category.includes(q));
   if (cat) apps = apps.filter(a => a.category === cat);
 
-  /* Desktop table */
   const tbody = document.getElementById('tableBody');
   if (!apps.length) {
     tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><p>No apps match your search.</p></div></td></tr>`;
@@ -232,7 +318,6 @@ function renderTable() {
     `).join('');
   }
 
-  /* Mobile cards */
   const mc = document.getElementById('mobileCards');
   if (!apps.length) {
     mc.innerHTML = `<div class="empty-state"><p>No apps match your search.</p></div>`;
@@ -265,7 +350,7 @@ function renderTable() {
 function filterTable() { renderTable(); }
 
 /* ══════════════════════════════
-   ADD FORM
+   ADD / EDIT FORM
 ══════════════════════════════ */
 function openAddForm() {
   resetForm();
@@ -275,13 +360,9 @@ function openAddForm() {
   goPage('form');
 }
 
-/* ══════════════════════════════
-   EDIT FORM
-══════════════════════════════ */
 function openEditForm(id) {
   const a = getApps().find(x => x.id === id);
   if (!a) return;
-
   resetForm();
   document.getElementById('editId').value        = a.id;
   document.getElementById('fName').value         = a.name;
@@ -299,34 +380,26 @@ function openEditForm(id) {
   document.getElementById('tagFree').checked     = a.tags.includes('free');
   document.getElementById('tagPopular').checked  = a.tags.includes('popular');
   document.getElementById('tagNew').checked      = a.tags.includes('new');
-
   document.getElementById('formHeading').textContent = `Edit — ${a.name}`;
   document.getElementById('formSub').textContent     = 'Update the app details below';
   document.getElementById('submitBtn').textContent   = '💾 Save Changes';
-
   updatePreview(a.logo, a.logoBg, a.name);
   goPage('form');
 }
 
-/* ══════════════════════════════
-   SUBMIT (Add or Edit)
-══════════════════════════════ */
 function submitForm() {
   const err = document.getElementById('formError');
   err.textContent = '';
-
   const name      = document.getElementById('fName').value.trim();
   const category  = document.getElementById('fCategory').value;
   const version   = document.getElementById('fVersion').value.trim();
   const size      = document.getElementById('fSize').value.trim();
   const logo      = document.getElementById('fLogo').value.trim();
   const desc      = document.getElementById('fDesc').value.trim();
-
   if (!name || !category || !version || !size || !logo || !desc) {
     err.textContent = '✕ Please fill in all required fields (marked with *).';
     return;
   }
-
   const rating    = Math.min(5, Math.max(0, parseFloat(document.getElementById('fRating').value) || 4.5));
   const reviews   = document.getElementById('fReviews').value.trim() || '0';
   const logoBg    = document.getElementById('fLogoBg').value.trim() || '#ffffff';
@@ -335,10 +408,8 @@ function submitForm() {
   const tags      = ['free','popular','new'].filter(t =>
     document.getElementById('tag' + t[0].toUpperCase() + t.slice(1)).checked
   );
-
   const apps   = getApps();
   const editId = document.getElementById('editId').value;
-
   if (editId) {
     const idx = apps.findIndex(a => a.id === parseInt(editId));
     if (idx !== -1) {
@@ -352,15 +423,11 @@ function submitForm() {
     saveApps(apps);
     toast('✅ App added successfully!', 'success');
   }
-
   resetForm();
   goPage('apps');
 }
 
-function cancelForm() {
-  resetForm();
-  goPage('apps');
-}
+function cancelForm() { resetForm(); goPage('apps'); }
 
 /* ══════════════════════════════
    DELETE
@@ -410,7 +477,6 @@ function resetForm() {
   updatePreview('', '#ffffff', '');
 }
 
-/* Live logo preview */
 function livePreview() {
   const src  = document.getElementById('fLogo').value.trim();
   const bg   = document.getElementById('fLogoBg').value.trim() || '#ffffff';
@@ -423,10 +489,8 @@ function updatePreview(src, bg, name) {
   const img      = document.getElementById('lpImg');
   const fallback = document.getElementById('lpFallback');
   const label    = document.getElementById('lpName');
-
   box.style.background = bg || '#ffffff';
   label.textContent    = name || 'App Name';
-
   if (src) {
     img.src = src;
     img.style.display = 'block';
@@ -443,7 +507,6 @@ function updatePreview(src, bg, name) {
   }
 }
 
-/* Color picker sync */
 function syncColor(source) {
   if (source === 'picker') {
     const val = document.getElementById('fLogoBgPicker').value;

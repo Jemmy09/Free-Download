@@ -11,7 +11,7 @@
 </head>
 <body class="admin-body">
 
-  <!-- ═══ LOGIN ═══ -->
+  <!-- ═══ LOGIN / REGISTER ═══ -->
   <div class="login-screen" id="loginScreen">
     <div class="login-card">
       <div class="login-logo">
@@ -19,19 +19,49 @@
         <span class="logo-text">Free<strong>Download</strong></span>
       </div>
       <div class="login-badge">🔐 Admin Portal</div>
-      <h2>Welcome back</h2>
-      <p class="login-sub">Sign in to manage your software library</p>
-      <div class="field-group">
-        <label>Username</label>
-        <input type="text" id="loginUser" placeholder="admin" autocomplete="off"/>
+
+      <!-- Tabs -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')">Sign In</button>
+        <button class="auth-tab" id="tabRegister" onclick="switchTab('register')">Register</button>
       </div>
-      <div class="field-group" style="margin-top:.9rem">
-        <label>Password</label>
-        <input type="password" id="loginPass" placeholder="••••••••"/>
+
+      <!-- LOGIN FORM -->
+      <div id="loginForm">
+        <h2>Welcome back</h2>
+        <p class="login-sub">Sign in with your admin credentials</p>
+        <div class="field-group" style="margin-top:1.25rem">
+          <label>Username</label>
+          <input type="text" id="loginUser" placeholder="Enter username" autocomplete="off"/>
+        </div>
+        <div class="field-group" style="margin-top:.9rem">
+          <label>Password</label>
+          <input type="password" id="loginPass" placeholder="Enter password"/>
+        </div>
+        <p class="login-error" id="loginError"></p>
+        <button class="btn-primary btn-block" id="loginBtn" onclick="doLogin()">Sign In →</button>
       </div>
-      <p class="login-error" id="loginError"></p>
-      <button class="btn-primary btn-block" onclick="doLogin()">Sign In →</button>
-      <p class="login-hint">Default credentials: <strong>admin</strong> / <strong>admin123</strong></p>
+
+      <!-- REGISTER FORM -->
+      <div id="registerForm" style="display:none">
+        <h2>Create Admin Account</h2>
+        <p class="login-sub">Registration is only open when no admin exists</p>
+        <div class="field-group" style="margin-top:1.25rem">
+          <label>Username</label>
+          <input type="text" id="regUser" placeholder="Choose a username" autocomplete="off"/>
+        </div>
+        <div class="field-group" style="margin-top:.9rem">
+          <label>Password</label>
+          <input type="password" id="regPass" placeholder="Min. 8 characters"/>
+        </div>
+        <div class="field-group" style="margin-top:.9rem">
+          <label>Confirm Password</label>
+          <input type="password" id="regPassConfirm" placeholder="Repeat password"/>
+        </div>
+        <p class="login-error" id="registerError"></p>
+        <button class="btn-primary btn-block" id="registerBtn" onclick="doRegister()">Create Account →</button>
+      </div>
+
     </div>
   </div>
 
@@ -86,7 +116,7 @@
           <span class="topbar-title" id="topbarTitle">Dashboard</span>
         </div>
         <div class="topbar-right">
-          <span class="admin-badge">👤 Admin</span>
+          <span class="admin-badge" id="adminBadge">👤 Admin</span>
         </div>
       </header>
 

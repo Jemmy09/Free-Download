@@ -36,6 +36,23 @@
 .login-hint strong { color: var(--accent2); }
 .btn-block { width: 100%; padding: 12px; margin-top: .75rem; font-size: .9rem; }
 
+/* Auth tabs */
+.auth-tabs {
+  display: flex; gap: 4px;
+  background: var(--card); border-radius: 10px; padding: 4px;
+  margin-bottom: 1.5rem;
+}
+.auth-tab {
+  flex: 1; padding: 8px; border-radius: 8px;
+  background: none; border: none; color: var(--muted);
+  font-size: .875rem; font-weight: 600; cursor: pointer;
+  transition: all .2s;
+}
+.auth-tab.active {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #fff;
+}
+
 /* ── SHELL ── */
 .admin-shell { display: flex; min-height: 100vh; }
 
