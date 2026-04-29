@@ -7,7 +7,7 @@ const rateLimit  = require('express-rate-limit');
 
 const app = express();
 
-/* ── ENV (set these in Render dashboard, never hardcode) ── */
+/* ── ENV (set these in Railway dashboard, never hardcode) ── */
 const DB_HOST     = process.env.DB_HOST;
 const DB_PORT     = parseInt(process.env.DB_PORT || '3306');
 const DB_USER     = process.env.DB_USER;
@@ -18,7 +18,7 @@ const JWT_SECRET  = process.env.JWT_SECRET;           // long random string
 const FRONTEND_URL = process.env.FRONTEND_URL || '*'; // your GitHub Pages URL
 
 if (!DB_HOST || !DB_USER || !DB_PASS || !DB_NAME || !JWT_SECRET) {
-  console.error('Missing required environment variables. Check Render dashboard.');
+  console.error('Missing required environment variables. Check Railway dashboard.');
   process.exit(1);
 }
 

@@ -1,11 +1,11 @@
 /* ═══════════════════════════════════════
    admin.js — FreeDownload Admin Panel
-   Auth: Aiven MySQL via Render API
+   Auth: Aiven MySQL via Railway API
    No hardcoded credentials.
 ═══════════════════════════════════════ */
 
-/* ── API base URL — replace with your Render service URL after deploying ── */
-const API_URL   = 'https://freedownload-api.onrender.com'; // ← update after deploy
+/* ── API base URL — replace with your Railway service URL after deploying ── */
+const API_URL   = 'https://freedownload-api.up.railway.app'; // ← update after deploy
 const TOKEN_KEY = 'fd_admin_jwt';
 const STORE_KEY = 'fd_software';
 
