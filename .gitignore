@@ -13,3 +13,6 @@ desktop.ini
 # Temp files
 *.tmp
 *.bak
+
+# Local scripts
+push-to-github.bat
