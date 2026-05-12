@@ -187,12 +187,12 @@ function renderSoftware(list) {
         </div>
       </div>
       <div class="sw-tags">
-        ${sw.tags.map(t => `<span class="sw-tag tag-${esc(t)}">${esc(t.charAt(0).toUpperCase()+t.slice(1))}</span>`).join("")}
+        ${sw.tags.map(t => `<span class="sw-tag tag-${esc(t)}">${esc(t.charAt(0).toUpperCase() + t.slice(1))}</span>`).join("")}
       </div>
       <p class="sw-desc">${esc(sw.desc)}</p>
       <div class="sw-footer">
         <div class="sw-rating">
-          <span class="stars">${"\u2605".repeat(Math.floor(sw.rating))}${sw.rating % 1 >= 0.5 ? "\u00bd" : ""}${"\u2606".repeat(5-Math.ceil(sw.rating))}</span>
+          <span class="stars">${"\u2605".repeat(Math.floor(sw.rating))}${sw.rating % 1 >= 0.5 ? "\u00bd" : ""}${"\u2606".repeat(5 - Math.ceil(sw.rating))}</span>
           <span>${sw.rating} (${esc(sw.reviews)})</span>
         </div>
         <button class="sw-dl-btn" data-id="${sw.id}">\u2b07 Get</button>
@@ -213,7 +213,7 @@ function renderSoftware(list) {
 
   // Safe image fallback — no inline onerror to prevent code injection
   grid.querySelectorAll('.sw-icon img').forEach(img => {
-    img.addEventListener('error', function() {
+    img.addEventListener('error', function () {
       const letter = this.dataset.fallback || '?';
       this.parentNode.innerHTML = '<span style="font-size:1.4rem;font-weight:700">' + letter + '</span>';
     });
@@ -241,7 +241,7 @@ function openModal(id) {
   const mImg = document.createElement('img');
   mImg.src = sw.logo;
   mImg.alt = sw.name;
-  mImg.addEventListener('error', function() {
+  mImg.addEventListener('error', function () {
     modalIconEl.innerHTML = '<span style="font-size:2.8rem;font-weight:700">' + esc(sw.name[0]) + '</span>';
   });
   modalIconEl.innerHTML = '';

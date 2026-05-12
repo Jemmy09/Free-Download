@@ -1,20 +1,20 @@
-const express    = require('express');
-const mysql      = require('mysql2/promise');
-const bcrypt     = require('bcryptjs');
-const jwt        = require('jsonwebtoken');
-const cors       = require('cors');
-const rateLimit  = require('express-rate-limit');
+const express = require('express');
+const mysql = require('mysql2/promise');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const cors = require('cors');
+const rateLimit = require('express-rate-limit');
 
 const app = express();
 
 /* ── ENV (set these in Railway dashboard, never hardcode) ── */
-const DB_HOST     = process.env.DB_HOST;
-const DB_PORT     = parseInt(process.env.DB_PORT || '3306');
-const DB_USER     = process.env.DB_USER;
-const DB_PASS     = process.env.DB_PASS;
-const DB_NAME     = process.env.DB_NAME;
-const DB_SSL      = process.env.DB_SSL !== 'false';   // Aiven requires SSL
-const JWT_SECRET  = process.env.JWT_SECRET;           // long random string
+const DB_HOST = process.env.DB_HOST;
+const DB_PORT = parseInt(process.env.DB_PORT || '3306');
+const DB_USER = process.env.DB_USER;
+const DB_PASS = process.env.DB_PASS;
+const DB_NAME = process.env.DB_NAME;
+const DB_SSL = process.env.DB_SSL !== 'false';   // Aiven requires SSL
+const JWT_SECRET = process.env.JWT_SECRET;           // long random string
 const FRONTEND_URL = process.env.FRONTEND_URL || '*'; // your GitHub Pages URL
 
 if (!DB_HOST || !DB_USER || !DB_PASS || !DB_NAME || !JWT_SECRET) {
@@ -42,15 +42,15 @@ const authLimiter = rateLimit({
 
 /* ── DATABASE POOL ── */
 const pool = mysql.createPool({
-  host:               DB_HOST,
-  port:               DB_PORT,
-  user:               DB_USER,
-  password:           DB_PASS,
-  database:           DB_NAME,
-  ssl:                DB_SSL ? { rejectUnauthorized: false } : false,
+  host: DB_HOST,
+  port: DB_PORT,
+  user: DB_USER,
+  password: DB_PASS,
+  database: DB_NAME,
+  ssl: DB_SSL ? { rejectUnauthorized: false } : false,
   waitForConnections: true,
-  connectionLimit:    5,
-  queueLimit:         0
+  connectionLimit: 5,
+  queueLimit: 0
 });
 
 /* ── INIT DB — create admins table if it doesn't exist ── */

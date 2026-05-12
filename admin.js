@@ -5,14 +5,14 @@
 ═══════════════════════════════════════ */
 
 /* ── API base URL — replace with your Railway service URL after deploying ── */
-const API_URL   = 'https://free-download-production.up.railway.app';
+const API_URL = 'https://free-download-production.up.railway.app';
 const TOKEN_KEY = 'fd_admin_jwt';
 const STORE_KEY = 'fd_software';
 
 /* ── Token helpers ── */
-function getToken()        { return localStorage.getItem(TOKEN_KEY); }
-function setToken(t)       { localStorage.setItem(TOKEN_KEY, t); }
-function clearToken()      { localStorage.removeItem(TOKEN_KEY); }
+function getToken() { return localStorage.getItem(TOKEN_KEY); }
+function setToken(t) { localStorage.setItem(TOKEN_KEY, t); }
+function clearToken() { localStorage.removeItem(TOKEN_KEY); }
 function isAuthenticated() { return !!getToken(); }
 
 /* ── Storage helpers ── */
@@ -30,11 +30,11 @@ function saveApps(apps) {
    TAB SWITCH
 ══════════════════════════════ */
 function switchTab(tab) {
-  document.getElementById('loginForm').style.display    = tab === 'login'    ? 'block' : 'none';
+  document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
   document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
-  document.getElementById('tabLogin').classList.toggle('active',    tab === 'login');
+  document.getElementById('tabLogin').classList.toggle('active', tab === 'login');
   document.getElementById('tabRegister').classList.toggle('active', tab === 'register');
-  document.getElementById('loginError').textContent    = '';
+  document.getElementById('loginError').textContent = '';
   document.getElementById('registerError').textContent = '';
 }
 
@@ -44,8 +44,8 @@ function switchTab(tab) {
 async function doLogin() {
   const btn = document.getElementById('loginBtn');
   const err = document.getElementById('loginError');
-  const u   = document.getElementById('loginUser').value.trim();
-  const p   = document.getElementById('loginPass').value;
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
 
   err.textContent = '';
   if (!u || !p) { err.textContent = '✕ Please enter username and password.'; return; }
@@ -54,10 +54,10 @@ async function doLogin() {
   btn.textContent = 'Signing in…';
 
   try {
-    const res  = await fetch(`${API_URL}/api/admin/login`, {
-      method:  'POST',
+    const res = await fetch(`${API_URL}/api/admin/login`, {
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ username: u, password: p })
+      body: JSON.stringify({ username: u, password: p })
     });
     const data = await res.json();
 
@@ -80,25 +80,25 @@ async function doLogin() {
    AUTH — REGISTER
 ══════════════════════════════ */
 async function doRegister() {
-  const btn  = document.getElementById('registerBtn');
-  const err  = document.getElementById('registerError');
-  const u    = document.getElementById('regUser').value.trim();
-  const p    = document.getElementById('regPass').value;
-  const p2   = document.getElementById('regPassConfirm').value;
+  const btn = document.getElementById('registerBtn');
+  const err = document.getElementById('registerError');
+  const u = document.getElementById('regUser').value.trim();
+  const p = document.getElementById('regPass').value;
+  const p2 = document.getElementById('regPassConfirm').value;
 
   err.textContent = '';
   if (!u || !p || !p2) { err.textContent = '✕ All fields are required.'; return; }
-  if (p !== p2)         { err.textContent = '✕ Passwords do not match.'; return; }
-  if (p.length < 8)     { err.textContent = '✕ Password must be at least 8 characters.'; return; }
+  if (p !== p2) { err.textContent = '✕ Passwords do not match.'; return; }
+  if (p.length < 8) { err.textContent = '✕ Password must be at least 8 characters.'; return; }
 
   btn.disabled = true;
   btn.textContent = 'Creating account…';
 
   try {
-    const res  = await fetch(`${API_URL}/api/admin/register`, {
-      method:  'POST',
+    const res = await fetch(`${API_URL}/api/admin/register`, {
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ username: u, password: p })
+      body: JSON.stringify({ username: u, password: p })
     });
     const data = await res.json();
 
@@ -122,10 +122,10 @@ async function doRegister() {
 ══════════════════════════════ */
 function doLogout() {
   clearToken();
-  document.getElementById('adminShell').style.display  = 'none';
+  document.getElementById('adminShell').style.display = 'none';
   document.getElementById('loginScreen').style.display = 'flex';
-  document.getElementById('loginUser').value  = '';
-  document.getElementById('loginPass').value  = '';
+  document.getElementById('loginUser').value = '';
+  document.getElementById('loginPass').value = '';
   document.getElementById('loginError').textContent = '';
 }
 
@@ -134,7 +134,7 @@ function doLogout() {
 ══════════════════════════════ */
 function showPanel(username) {
   document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('adminShell').style.display  = 'flex';
+  document.getElementById('adminShell').style.display = 'flex';
   const badge = document.getElementById('adminBadge');
   if (badge) badge.textContent = '👤 ' + (username || 'Admin');
   initAdmin();
@@ -142,8 +142,8 @@ function showPanel(username) {
 
 /* ── Enter key support ── */
 document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('loginUser')?.addEventListener('keydown',      e => { if (e.key === 'Enter') doLogin(); });
-  document.getElementById('loginPass')?.addEventListener('keydown',      e => { if (e.key === 'Enter') doLogin(); });
+  document.getElementById('loginUser')?.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+  document.getElementById('loginPass')?.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
   document.getElementById('regPassConfirm')?.addEventListener('keydown', e => { if (e.key === 'Enter') doRegister(); });
 });
 
@@ -151,12 +151,12 @@ document.addEventListener('DOMContentLoaded', () => {
 (async () => {
   const token = getToken();
   if (!token) {
-    document.getElementById('adminShell').style.display  = 'none';
+    document.getElementById('adminShell').style.display = 'none';
     document.getElementById('loginScreen').style.display = 'flex';
     return;
   }
   try {
-    const res  = await fetch(`${API_URL}/api/admin/verify`, {
+    const res = await fetch(`${API_URL}/api/admin/verify`, {
       headers: { 'Authorization': 'Bearer ' + token }
     });
     if (res.ok) {
@@ -164,12 +164,12 @@ document.addEventListener('DOMContentLoaded', () => {
       showPanel(data.username);
     } else {
       clearToken();
-      document.getElementById('adminShell').style.display  = 'none';
+      document.getElementById('adminShell').style.display = 'none';
       document.getElementById('loginScreen').style.display = 'flex';
     }
   } catch {
     /* Server unreachable — show login, don't auto-login */
-    document.getElementById('adminShell').style.display  = 'none';
+    document.getElementById('adminShell').style.display = 'none';
     document.getElementById('loginScreen').style.display = 'flex';
   }
 })();
@@ -200,7 +200,7 @@ function goPage(name) {
   document.getElementById('topbarTitle').textContent = PAGE_TITLES[name] || name;
   closeSidebar();
   if (name === 'dashboard') renderDashboard();
-  if (name === 'apps')      renderTable();
+  if (name === 'apps') renderTable();
 }
 
 document.querySelectorAll('.snav-btn[data-page]').forEach(btn =>
@@ -283,10 +283,10 @@ function renderDashboard() {
    MANAGE APPS TABLE
 ══════════════════════════════ */
 function renderTable() {
-  const q   = (document.getElementById('adminSearch')?.value || '').trim().toLowerCase();
+  const q = (document.getElementById('adminSearch')?.value || '').trim().toLowerCase();
   const cat = document.getElementById('catFilter')?.value || '';
-  let apps  = getApps();
-  if (q)   apps = apps.filter(a => a.name.toLowerCase().includes(q) || a.category.includes(q));
+  let apps = getApps();
+  if (q) apps = apps.filter(a => a.name.toLowerCase().includes(q) || a.category.includes(q));
   if (cat) apps = apps.filter(a => a.category === cat);
 
   const tbody = document.getElementById('tableBody');
@@ -355,8 +355,8 @@ function filterTable() { renderTable(); }
 function openAddForm() {
   resetForm();
   document.getElementById('formHeading').textContent = 'Add New App';
-  document.getElementById('formSub').textContent     = 'Fill in the details to add a new app';
-  document.getElementById('submitBtn').textContent   = '+ Add App';
+  document.getElementById('formSub').textContent = 'Fill in the details to add a new app';
+  document.getElementById('submitBtn').textContent = '+ Add App';
   goPage('form');
 }
 
@@ -364,25 +364,25 @@ function openEditForm(id) {
   const a = getApps().find(x => x.id === id);
   if (!a) return;
   resetForm();
-  document.getElementById('editId').value        = a.id;
-  document.getElementById('fName').value         = a.name;
-  document.getElementById('fCategory').value     = a.category;
-  document.getElementById('fVersion').value      = a.version;
-  document.getElementById('fSize').value         = a.size;
-  document.getElementById('fRating').value       = a.rating;
-  document.getElementById('fReviews').value      = a.reviews;
-  document.getElementById('fLogo').value         = a.logo;
-  document.getElementById('fLogoBg').value       = a.logoBg;
+  document.getElementById('editId').value = a.id;
+  document.getElementById('fName').value = a.name;
+  document.getElementById('fCategory').value = a.category;
+  document.getElementById('fVersion').value = a.version;
+  document.getElementById('fSize').value = a.size;
+  document.getElementById('fRating').value = a.rating;
+  document.getElementById('fReviews').value = a.reviews;
+  document.getElementById('fLogo').value = a.logo;
+  document.getElementById('fLogoBg').value = a.logoBg;
   document.getElementById('fLogoBgPicker').value = /^#[0-9a-f]{6}$/i.test(a.logoBg) ? a.logoBg : '#ffffff';
-  document.getElementById('fDesc').value         = a.desc;
-  document.getElementById('fUrl').value          = a.url || '';
-  document.getElementById('fDirectUrl').value    = a.directUrl || '';
-  document.getElementById('tagFree').checked     = a.tags.includes('free');
-  document.getElementById('tagPopular').checked  = a.tags.includes('popular');
-  document.getElementById('tagNew').checked      = a.tags.includes('new');
+  document.getElementById('fDesc').value = a.desc;
+  document.getElementById('fUrl').value = a.url || '';
+  document.getElementById('fDirectUrl').value = a.directUrl || '';
+  document.getElementById('tagFree').checked = a.tags.includes('free');
+  document.getElementById('tagPopular').checked = a.tags.includes('popular');
+  document.getElementById('tagNew').checked = a.tags.includes('new');
   document.getElementById('formHeading').textContent = `Edit — ${a.name}`;
-  document.getElementById('formSub').textContent     = 'Update the app details below';
-  document.getElementById('submitBtn').textContent   = '💾 Save Changes';
+  document.getElementById('formSub').textContent = 'Update the app details below';
+  document.getElementById('submitBtn').textContent = '💾 Save Changes';
   updatePreview(a.logo, a.logoBg, a.name);
   goPage('form');
 }
@@ -390,25 +390,25 @@ function openEditForm(id) {
 function submitForm() {
   const err = document.getElementById('formError');
   err.textContent = '';
-  const name      = document.getElementById('fName').value.trim();
-  const category  = document.getElementById('fCategory').value;
-  const version   = document.getElementById('fVersion').value.trim();
-  const size      = document.getElementById('fSize').value.trim();
-  const logo      = document.getElementById('fLogo').value.trim();
-  const desc      = document.getElementById('fDesc').value.trim();
+  const name = document.getElementById('fName').value.trim();
+  const category = document.getElementById('fCategory').value;
+  const version = document.getElementById('fVersion').value.trim();
+  const size = document.getElementById('fSize').value.trim();
+  const logo = document.getElementById('fLogo').value.trim();
+  const desc = document.getElementById('fDesc').value.trim();
   if (!name || !category || !version || !size || !logo || !desc) {
     err.textContent = '✕ Please fill in all required fields (marked with *).';
     return;
   }
-  const rating    = Math.min(5, Math.max(0, parseFloat(document.getElementById('fRating').value) || 4.5));
-  const reviews   = document.getElementById('fReviews').value.trim() || '0';
-  const logoBg    = document.getElementById('fLogoBg').value.trim() || '#ffffff';
-  const url       = document.getElementById('fUrl').value.trim();
+  const rating = Math.min(5, Math.max(0, parseFloat(document.getElementById('fRating').value) || 4.5));
+  const reviews = document.getElementById('fReviews').value.trim() || '0';
+  const logoBg = document.getElementById('fLogoBg').value.trim() || '#ffffff';
+  const url = document.getElementById('fUrl').value.trim();
   const directUrl = document.getElementById('fDirectUrl').value.trim();
-  const tags      = ['free','popular','new'].filter(t =>
+  const tags = ['free', 'popular', 'new'].filter(t =>
     document.getElementById('tag' + t[0].toUpperCase() + t.slice(1)).checked
   );
-  const apps   = getApps();
+  const apps = getApps();
   const editId = document.getElementById('editId').value;
   if (editId) {
     const idx = apps.findIndex(a => a.id === parseInt(editId));
@@ -466,31 +466,31 @@ document.getElementById('deleteModal').addEventListener('click', e => {
    FORM HELPERS
 ══════════════════════════════ */
 function resetForm() {
-  ['fName','fCategory','fVersion','fSize','fRating','fReviews','fLogo','fDesc','fUrl','fDirectUrl','editId']
+  ['fName', 'fCategory', 'fVersion', 'fSize', 'fRating', 'fReviews', 'fLogo', 'fDesc', 'fUrl', 'fDirectUrl', 'editId']
     .forEach(id => { document.getElementById(id).value = ''; });
-  document.getElementById('fLogoBg').value       = '#ffffff';
+  document.getElementById('fLogoBg').value = '#ffffff';
   document.getElementById('fLogoBgPicker').value = '#ffffff';
-  document.getElementById('tagFree').checked     = false;
-  document.getElementById('tagPopular').checked  = false;
-  document.getElementById('tagNew').checked      = false;
+  document.getElementById('tagFree').checked = false;
+  document.getElementById('tagPopular').checked = false;
+  document.getElementById('tagNew').checked = false;
   document.getElementById('formError').textContent = '';
   updatePreview('', '#ffffff', '');
 }
 
 function livePreview() {
-  const src  = document.getElementById('fLogo').value.trim();
-  const bg   = document.getElementById('fLogoBg').value.trim() || '#ffffff';
+  const src = document.getElementById('fLogo').value.trim();
+  const bg = document.getElementById('fLogoBg').value.trim() || '#ffffff';
   const name = document.getElementById('fName').value.trim();
   updatePreview(src, bg, name);
 }
 
 function updatePreview(src, bg, name) {
-  const box      = document.getElementById('lpBox');
-  const img      = document.getElementById('lpImg');
+  const box = document.getElementById('lpBox');
+  const img = document.getElementById('lpImg');
   const fallback = document.getElementById('lpFallback');
-  const label    = document.getElementById('lpName');
+  const label = document.getElementById('lpName');
   box.style.background = bg || '#ffffff';
-  label.textContent    = name || 'App Name';
+  label.textContent = name || 'App Name';
   if (src) {
     img.src = src;
     img.style.display = 'block';
@@ -525,7 +525,7 @@ function syncColor(source) {
 ══════════════════════════════ */
 function toast(msg, type = 'success') {
   const wrap = document.getElementById('toastWrap');
-  const el   = document.createElement('div');
+  const el = document.createElement('div');
   el.className = `toast-item ${type}`;
   el.textContent = msg;
   wrap.appendChild(el);
